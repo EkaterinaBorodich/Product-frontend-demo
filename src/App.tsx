@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import ProductCard from "./components/ProductCard";
 import { type Product, type CartItem } from "./types";
+import { MockProducts, MockCategories } from "./mockdata";
 
-const API_URL = "https://product-bakend-demo.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export default function App() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -16,7 +17,9 @@ export default function App() {
     fetch(`${API_URL}/products/categories`)
       .then((res) => res.json())
       .then(setCategories)
-      .catch(console.error);
+      .catch(() => {
+        setCategories(MockCategories);
+      });
   }, []);
 
   useEffect(() => {
@@ -31,8 +34,11 @@ export default function App() {
         setProducts(data);
         setLoading(false);
       })
-      .catch((err) => {
-        console.error(err);
+      .catch(() => {
+        const filtered = selectedCategory
+          ? MockProducts.filter((p) => p.category === selectedCategory)
+          : MockProducts;
+        setProducts(filtered);
         setLoading(false);
       });
   }, [selectedCategory]);
